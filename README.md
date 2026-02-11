@@ -1,6 +1,6 @@
 # ignlnk
 
-This is an different attempt to solve privacy issue with LLM agents.
+This is a different attempt to solve privacy issue with LLM agents.
 
 Currently agentics apps have no standard way to hide files from LLM agents, best scenario is .gitignore + platform-defined settings/ignorefile, some only use .gitignore, some only use settings. This is especially an issue when your "files not to commit" and "files not to be sent to LLM providers" overlaps.
 
@@ -8,9 +8,9 @@ Regardless the configuration, the idea of hiding existence of files has its issu
 
 Therefore I am trying to create a platform agnostic solution that does not hide the file but hide the content.
 
-Basically, ignlnk swap the files you lock with symlinks and replace the symlinks with placeholder files telling agents to ask you to unlock the files.
+Basically, ignlnk replaces files with placeholder stubs when you lock them (originals go to a vault), and replaces those placeholders with symlinks when you unlock.
 
-Functionality wise this is just an file content obfuscation tool, but this adapt to agents' natural language capability to ask for permission when they see the placeholder. 
+Functionality wise this is just a file content obfuscation tool, but this adapt to agents' natural language capability to ask for permission when they see the placeholder. 
 
 Just like [Projex](https://github.com/No3371/projex), this is for collaborative agentic development. If you like hands off vibe coding, it's much less meaningful.
 
@@ -38,7 +38,7 @@ Each managed file has two states:
 
 | State | In Project Tree | In Vault | Agent Sees |
 |---|---|---|---|
-| **Locked** | Placeholder stub | Original file | A text file saying `"this file is managed by ignlnk"` |
+| **Locked** | Placeholder stub | Original file | A text file prefixed with `[ignlnk:protected]` instructing agents to ask you to unlock |
 | **Unlocked** | Symlink → vault | Original file | Real content (via symlink) |
 
 ```
@@ -68,14 +68,9 @@ go install github.com/No3371/ignlnk@latest
 
 This installs the binary to `$GOPATH/bin` (typically `~/go/bin` or `%USERPROFILE%\go\bin` on Windows). Make sure this directory is in your `PATH`.
 
-### Go Install
-
-```
-go install https://github.com/No3371/ignlnk.git
-```
-
 ### Binary
-Downlad and move the binary to somewhere on your `PATH`:
+
+Download the latest binary from [GitHub Releases](https://github.com/No3371/ignlnk/releases) and move it somewhere on your `PATH`:
 
 ## Quick Start
 
@@ -179,20 +174,21 @@ Lock replaces files with plaintext placeholders and does **not** require symlink
   index.json               ← Maps project roots to vault UIDs
   vault/<uid>/             ← Per-project vault directory
     path/to/file           ← Original files, mirroring project structure
+  vault/<uid>.backup/      ← Mirror backup copy (redundancy; created on lock)
 ```
 
 ## Safety
 
 ignlnk is designed to never lose your data:
 
-- **Atomic operations**: File moves use rename where possible; cross-device moves copy-then-remove with hash verification.
+- **Atomic placeholder writes**: Placeholder files are written atomically (write-then-rename). Files are copied to the vault with hash verification before the original is overwritten.
 - **Manifest locking**: A file lock prevents concurrent mutations from corrupting state.
 - **Signal handling**: Graceful manifest save on SIGINT/SIGTERM during batch operations.
 - **Hash verification**: SHA-256 checksums are stored in the manifest and verified during unlock/forget to detect corruption.
 
 ## Known Limitations
 
-- **One vault location**: The vault is always at `~/.ignlnk/vault/` — not configurable yet.
+- **One vault location**: The vault is always at `~/.ignlnk/vault/` — not configurable yet. A mirror backup (`<uid>.backup/`) is also created for redundancy.
 - **No encryption**: Vault files are stored in plaintext. The vault provides *isolation*, not *encryption*.
 - **Symlink visibility**: Some tools follow symlinks transparently, so an unlocked file's content is fully accessible. Only the **locked** state truly hides content.
 - **No `.gitignore` auto-sync**: You should manually add `.ignlnk/` to your `.gitignore`.
