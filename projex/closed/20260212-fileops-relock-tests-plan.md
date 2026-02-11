@@ -1,7 +1,9 @@
 # Plan: LockFile re-lock — tests and documentation
 
-> **Status:** Ready
+> **Status:** Complete
 > **Created:** 2026-02-12
+> **Completed:** 2026-02-12
+> **Walkthrough:** 20260212-fileops-relock-tests-walkthrough.md
 > **Source:** @20260212-fileops-lockfile-relock-redteam.md (Should Fix)
 > **Related Projex:** 20260212-fileops-lockfile-relock-redteam.md, 20260212-fileops-relock-symlink-verification-plan.md
 

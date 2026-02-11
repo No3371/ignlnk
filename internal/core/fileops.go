@@ -71,8 +71,16 @@ func LockFile(project *Project, vault *Vault, manifest *Manifest, relPath string
 
 	absPath := project.AbsPath(relPath)
 
-	// Re-locking: if file is already managed and unlocked (symlink), just swap symlink for placeholder
+	// Re-locking: if file is already managed and unlocked (symlink), swap symlink for placeholder.
+	// We verify absPath is a symlink before removing — if it's a regular file, refuse to avoid data loss.
 	if entry, ok := manifest.Files[relPath]; ok && entry.State == "unlocked" {
+		info, err := os.Lstat(absPath)
+		if err != nil {
+			return fmt.Errorf("stat before re-lock: %w", err)
+		}
+		if info.Mode()&os.ModeSymlink == 0 {
+			return fmt.Errorf("refusing to re-lock %s: path is not a symlink (may contain user data). Run 'ignlnk unlock %s' first, then lock again", relPath, relPath)
+		}
 		if err := os.Remove(absPath); err != nil {
 			return fmt.Errorf("removing symlink: %w", err)
 		}
