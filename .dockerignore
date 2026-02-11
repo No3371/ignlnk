@@ -1,0 +1,10 @@
+# Ignore nonessential files for smaller, faster Docker builds
+.git
+.gitignore
+*.md
+!go.mod
+!go.sum
+.claude
+projex
+nul
+.DS_Store
