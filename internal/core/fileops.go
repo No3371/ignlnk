@@ -129,6 +129,17 @@ func LockFile(project *Project, vault *Vault, manifest *Manifest, relPath string
 		return fmt.Errorf("vault copy hash mismatch — aborting lock")
 	}
 
+	// Copy to mirror backup (single redundant copy; fail lock if backup fails)
+	backupPath := vault.BackupPath(relPath)
+	if err := os.MkdirAll(filepath.Dir(backupPath), 0o755); err != nil {
+		os.Remove(vaultPath)
+		return fmt.Errorf("creating backup directory: %w", err)
+	}
+	if err := copyFile(vaultPath, backupPath); err != nil {
+		os.Remove(vaultPath)
+		return fmt.Errorf("copying to backup vault: %w", err)
+	}
+
 	// Point of no return: vault copy verified. Write placeholder over original.
 	placeholder := GeneratePlaceholder(relPath)
 	r := strings.NewReader(string(placeholder))
@@ -229,6 +240,11 @@ func ForgetFile(project *Project, vault *Vault, manifest *Manifest, relPath stri
 	// Remove vault file and empty parent dirs
 	os.Remove(vaultPath)
 	removeEmptyParents(filepath.Dir(vaultPath), vault.Dir)
+
+	// Remove backup and empty backup parents
+	backupPath := vault.BackupPath(relPath)
+	os.Remove(backupPath)
+	removeEmptyParents(filepath.Dir(backupPath), vault.BackupDir())
 
 	// Remove from manifest (in-memory; caller saves)
 	delete(manifest.Files, relPath)

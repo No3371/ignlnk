@@ -200,6 +200,16 @@ func (v *Vault) FilePath(relPath string) string {
 	return filepath.Join(v.Dir, filepath.FromSlash(relPath))
 }
 
+// BackupDir returns the path to the mirror backup vault (~/.ignlnk/vault/<uid>.backup/).
+func (v *Vault) BackupDir() string {
+	return filepath.Join(filepath.Dir(v.Dir), v.UID+".backup")
+}
+
+// BackupPath returns the backup path for a given manifest relative path.
+func (v *Vault) BackupPath(relPath string) string {
+	return filepath.Join(v.BackupDir(), filepath.FromSlash(relPath))
+}
+
 // generateUID generates 8 hex characters (4 random bytes) using crypto/rand.
 func generateUID() string {
 	b := make([]byte, 4)

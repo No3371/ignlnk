@@ -1,7 +1,9 @@
 # Plan: Mirror Backup Vault
 
-> **Status:** Ready
+> **Status:** Complete
 > **Created:** 2026-02-12
+> **Completed:** 2026-02-12
+> **Walkthrough:** 20260212-vault-mirror-backup-walkthrough.md
 > **Source:** @20260212-vault-mirror-backup-proposal.md
 > **Related Projex:** 20260212-vault-mirror-backup-proposal.md, 20260212-vault-redundancy-eval.md
 
