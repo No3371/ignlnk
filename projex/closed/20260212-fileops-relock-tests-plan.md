@@ -5,7 +5,7 @@
 > **Completed:** 2026-02-12
 > **Walkthrough:** 20260212-fileops-relock-tests-walkthrough.md
 > **Source:** @20260212-fileops-lockfile-relock-redteam.md (Should Fix)
-> **Related Projex:** 20260212-fileops-lockfile-relock-redteam.md, 20260212-fileops-relock-symlink-verification-plan.md
+> **Related Projex:** 20260212-fileops-lockfile-relock-redteam.md, 20260212-fileops-verify-path-before-remove-plan.md
 
 ---
 
@@ -55,7 +55,7 @@ The red team identified that re-lock behavior must be validated by tests. Curren
 
 ### Dependencies
 
-- **Requires:** 20260212-fileops-relock-symlink-verification-plan.md (tests verify that fix)
+- **Requires:** 20260212-fileops-verify-path-before-remove-plan.md (tests verify that fix)
 - **Blocks:** None
 
 ### Constraints

@@ -3,7 +3,7 @@
 > **Status:** Ready
 > **Created:** 2026-02-12
 > **Source:** @20260212-fileops-lockfile-relock-redteam.md (Monitor)
-> **Related Projex:** 20260212-fileops-lockfile-relock-redteam.md, 20260212-fileops-relock-symlink-verification-plan.md
+> **Related Projex:** 20260212-fileops-lockfile-relock-redteam.md, 20260212-fileops-verify-path-before-remove-plan.md
 
 ---
 
@@ -50,7 +50,7 @@ Plan 1 adds the Lstat check and returns an error when path is not symlink. No lo
 
 ### Dependencies
 
-- **Requires:** 20260212-fileops-relock-symlink-verification-plan.md (logging is in the refusal path that plan adds)
+- **Requires:** 20260212-fileops-verify-path-before-remove-plan.md (logging is in the refusal path that plan adds)
 - **Blocks:** None
 
 ### Constraints
@@ -122,4 +122,4 @@ Remove the fmt.Fprintf line. No behavioral change.
 
 ### Implementation Note
 
-This plan can be executed together with 20260212-fileops-relock-symlink-verification-plan.md as a single change: add the check, the log, and the error return in one edit.
+This plan can be executed together with 20260212-fileops-verify-path-before-remove-plan.md as a single change: add the check, the log, and the error return in one edit.

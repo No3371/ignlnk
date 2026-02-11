@@ -1,6 +1,7 @@
 # Plan: UnlockFile — refuse when path is not placeholder
 
-> **Status:** Ready
+> **Status:** Merged
+> **Merged into:** 20260212-fileops-verify-path-before-remove-plan.md
 > **Created:** 2026-02-12
 > **Source:** @20260212-fileops-lockfile-relock-redteam.md (Must Fix — UnlockFile)
 > **Related Projex:** 20260212-fileops-lockfile-relock-redteam.md

@@ -131,16 +131,16 @@ if entry, ok := manifest.Files[relPath]; ok && entry.State == "unlocked" {
 
 ### Must Fix (Before Proceeding)
 - **[L76–77]** Add `os.Lstat(absPath)` before `os.Remove`. If not symlink, return error or safely handle. Prevents blind removal of user data.
-- **Plan:** @20260212-fileops-relock-symlink-verification-plan.md
+- **Plan:** @20260212-fileops-verify-path-before-remove-plan.md
 - **[UnlockFile L189]** If `!IsPlaceholder(absPath)` and file is regular, **refuse** unlock. Do not remove. Return error suggesting user back up content first.
-- **Plan:** @20260212-fileops-unlock-placeholder-verification-plan.md
+- **Plan:** @20260212-fileops-verify-path-before-remove-plan.md (merged; includes UnlockFile)
 
 ### Should Fix (Before Production)
 - Add tests: re-lock when absPath is symlink (OK), and when absPath is regular file (refuse or safe path).
 - Document that re-lock path assumes symlink; add defensive check.
 - **Plan:** @20260212-fileops-relock-tests-plan.md
 - **[ForgetFile L216]** Verify absPath is placeholder or symlink before remove. If regular file with differing content, refuse or require `--force`.
-- **Plan:** @20260212-fileops-forget-path-verification-plan.md
+- **Plan:** @20260212-fileops-verify-path-before-remove-plan.md (merged; includes ForgetFile)
 
 ### Monitor
 - Log when manifest state and filesystem state diverge; consider repair/repair tooling.

@@ -1,6 +1,7 @@
 # Plan: ForgetFile — verify path before remove
 
-> **Status:** Ready
+> **Status:** Merged
+> **Merged into:** 20260212-fileops-verify-path-before-remove-plan.md
 > **Created:** 2026-02-12
 > **Source:** @20260212-fileops-lockfile-relock-redteam.md (Should Fix — ForgetFile)
 > **Related Projex:** 20260212-fileops-lockfile-relock-redteam.md
