@@ -1,5 +1,25 @@
 # ignlnk
 
+This is an different attempt to solve privacy issue with LLM agents.
+
+Currently agentics apps have no standard way to hide files from LLM agents, best scenario is .gitignore + platform-defined settings/ignorefile, some only use .gitignore, some only use settings. This is especially an issue when your "files not to commit" and "files not to be sent to LLM providers" overlaps.
+
+Regardless the configuration, the idea of hiding existence of files has its issues. Agents may try to "fix" missing files, make wrong decisions because they thinks the hidden files should exist for the workload.
+
+Therefore I am trying to create a platform agnostic solution that does not hide the file but hide the content.
+
+Basically, ignlnk swap the files you lock with symlinks and replace the symlinks with placeholder files telling agents to ask you to unlock the files.
+
+Functionality wise this is just an file content obfuscation tool, but this adapt to agents' natural language capability to ask for permission when they see the placeholder. 
+
+Just like [Projex](github.com/No3371/projex), this is for collaborative agentic development. If you like hands off vibe coding, it's much less meaningful.
+
+Note1: By the way, this is based on an assumption: the agents are not malicious. This only prevents less capable agents accidentally read, write or leak content of private files.
+
+Note2: This is mostly generated after a lengthened planning. If you are interested how this is planned, check [projex](./projex/) folder.
+
+-- The following is LLM generated --
+
 **Protect sensitive files from AI coding agents.**
 
 ignlnk is a CLI tool that shields files you don't want AI agents to read or modify — API keys, credentials, proprietary configs, personal notes — by replacing them with inert placeholder stubs and storing the originals in a secure vault outside your project tree.
@@ -48,23 +68,14 @@ go install github.com/No3371/ignlnk@latest
 
 This installs the binary to `$GOPATH/bin` (typically `~/go/bin` or `%USERPROFILE%\go\bin` on Windows). Make sure this directory is in your `PATH`.
 
-### From Source
+### Go Install
 
-```bash
-git clone https://github.com/No3371/ignlnk.git
-cd ignlnk
-go build -o ignlnk .
+```
+go install https://github.com/No3371/ignlnk.git
 ```
 
-Move the binary to somewhere on your `PATH`:
-
-```bash
-# Linux / macOS
-mv ignlnk /usr/local/bin/
-
-# Windows (PowerShell)
-Move-Item ignlnk.exe C:\Users\<you>\bin\
-```
+### Binary
+Downlad and move the binary to somewhere on your `PATH`:
 
 ## Quick Start
 
