@@ -202,9 +202,9 @@ func UnlockFile(project *Project, vault *Vault, manifest *Manifest, relPath stri
 	// Check if placeholder exists and is actually a placeholder
 	if info, err := os.Lstat(absPath); err == nil {
 		if info.Mode().IsRegular() && !IsPlaceholder(absPath) {
-			fmt.Fprintf(os.Stderr, "warning: file at %s has been modified (not a placeholder)\n", filepath.FromSlash(relPath))
+			return fmt.Errorf("refusing to unlock %s: path contains user data (not a placeholder). Copy your content elsewhere, then run 'ignlnk unlock %s' again", relPath, relPath)
 		}
-		// Remove the placeholder (or whatever is there)
+		// Remove the placeholder (or symlink) before creating new symlink
 		if err := os.Remove(absPath); err != nil {
 			return fmt.Errorf("removing placeholder: %w", err)
 		}
@@ -231,7 +231,12 @@ func ForgetFile(project *Project, vault *Vault, manifest *Manifest, relPath stri
 	vaultPath := vault.FilePath(relPath)
 
 	// Remove whatever is at the original path (placeholder or symlink)
-	if _, err := os.Lstat(absPath); err == nil {
+	// Verify path is expected type before destructive operation
+	if info, err := os.Lstat(absPath); err == nil {
+		if info.Mode().IsRegular() && !IsPlaceholder(absPath) {
+			return fmt.Errorf("refusing to forget %s: path contains user data (not a placeholder or symlink). Run 'ignlnk lock %s' first to lock, then forget", relPath, relPath)
+		}
+		// Path is symlink or placeholder — safe to remove
 		if err := os.Remove(absPath); err != nil {
 			return fmt.Errorf("removing existing file: %w", err)
 		}

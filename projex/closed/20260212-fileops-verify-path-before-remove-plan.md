@@ -1,6 +1,8 @@
 # Plan: fileops — verify path type before remove (LockFile, UnlockFile, ForgetFile)
 
-> **Status:** Ready
+> **Status:** Complete
+> **Completed:** 2026-02-12
+> **Walkthrough:** 20260212-fileops-verify-path-before-remove-walkthrough.md
 > **Created:** 2026-02-12
 > **Source:** @20260212-fileops-lockfile-relock-redteam.md (Must Fix + Should Fix)
 > **Related Projex:** 20260212-fileops-lockfile-relock-redteam.md
