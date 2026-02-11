@@ -356,3 +356,167 @@ func TestForgetFileRegularFileRefused(t *testing.T) {
 		t.Fatalf("vault content changed: got %q, want %q", string(vGot), string(vaultContent))
 	}
 }
+
+func TestUnlockFilePlaceholderWithAppendedContentRefused(t *testing.T) {
+	p, v, m, cleanup := setupLockFileTest(t)
+	defer cleanup()
+
+	relPath := "config/secret.txt"
+	absPath := p.AbsPath(relPath)
+	vaultPath := v.FilePath(relPath)
+
+	if err := os.MkdirAll(filepath.Dir(absPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Dir(vaultPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(vaultPath, []byte("vault content"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Placeholder + appended content — size spoof; must be refused
+	placeholder := GeneratePlaceholder(relPath)
+	content := append(placeholder, []byte("extra user content")...)
+	if err := os.WriteFile(absPath, content, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	m.Files[relPath] = &FileEntry{State: "locked", Hash: "sha256:fake"}
+
+	err := UnlockFile(p, v, m, relPath)
+	if err == nil {
+		t.Fatal("expected UnlockFile to return error for placeholder with appended content, got nil")
+	}
+
+	got, err := os.ReadFile(absPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != string(content) {
+		t.Fatalf("file content changed: got %q, want %q", string(got), string(content))
+	}
+}
+
+func TestUnlockFileDirectoryRefused(t *testing.T) {
+	p, v, m, cleanup := setupLockFileTest(t)
+	defer cleanup()
+
+	relPath := "config/secret.txt"
+	absPath := p.AbsPath(relPath)
+	vaultPath := v.FilePath(relPath)
+
+	if err := os.MkdirAll(filepath.Dir(vaultPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(vaultPath, []byte("vault content"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create directory at absPath (where file is expected)
+	if err := os.MkdirAll(absPath, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	m.Files[relPath] = &FileEntry{State: "locked", Hash: "sha256:fake"}
+
+	err := UnlockFile(p, v, m, relPath)
+	if err == nil {
+		t.Fatal("expected UnlockFile to return error for directory, got nil")
+	}
+
+	// Verify directory still exists
+	info, err := os.Stat(absPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !info.IsDir() {
+		t.Fatal("expected directory at absPath to remain")
+	}
+}
+
+func TestForgetFilePlaceholderWithAppendedContentRefused(t *testing.T) {
+	p, v, m, cleanup := setupLockFileTest(t)
+	defer cleanup()
+
+	relPath := "config/secret.txt"
+	absPath := p.AbsPath(relPath)
+	vaultPath := v.FilePath(relPath)
+	vaultContent := []byte("vault content")
+
+	if err := os.MkdirAll(filepath.Dir(absPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Dir(vaultPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(vaultPath, vaultContent, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Placeholder + appended content — size spoof; must be refused
+	placeholder := GeneratePlaceholder(relPath)
+	content := append(placeholder, []byte("extra user content")...)
+	if err := os.WriteFile(absPath, content, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	m.Files[relPath] = &FileEntry{State: "locked", Hash: "sha256:fake"}
+
+	err := ForgetFile(p, v, m, relPath)
+	if err == nil {
+		t.Fatal("expected ForgetFile to return error for placeholder with appended content, got nil")
+	}
+
+	got, err := os.ReadFile(absPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != string(content) {
+		t.Fatalf("file content changed: got %q, want %q", string(got), string(content))
+	}
+	if vGot, _ := os.ReadFile(vaultPath); string(vGot) != string(vaultContent) {
+		t.Fatal("vault content should be unchanged")
+	}
+}
+
+func TestForgetFileDirectoryRefused(t *testing.T) {
+	p, v, m, cleanup := setupLockFileTest(t)
+	defer cleanup()
+
+	relPath := "config/secret.txt"
+	absPath := p.AbsPath(relPath)
+	vaultPath := v.FilePath(relPath)
+	vaultContent := []byte("vault content")
+
+	if err := os.MkdirAll(filepath.Dir(vaultPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(vaultPath, vaultContent, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create directory at absPath (where file is expected)
+	if err := os.MkdirAll(absPath, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	m.Files[relPath] = &FileEntry{State: "locked", Hash: "sha256:fake"}
+
+	err := ForgetFile(p, v, m, relPath)
+	if err == nil {
+		t.Fatal("expected ForgetFile to return error for directory, got nil")
+	}
+
+	// Verify directory still exists
+	info, err := os.Stat(absPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !info.IsDir() {
+		t.Fatal("expected directory at absPath to remain")
+	}
+	if vGot, _ := os.ReadFile(vaultPath); string(vGot) != string(vaultContent) {
+		t.Fatal("vault content should be unchanged")
+	}
+}

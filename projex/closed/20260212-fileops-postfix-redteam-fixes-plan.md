@@ -1,7 +1,9 @@
 # Plan: fileops post-redteam fixes (IsPlaceholder size check, directory rejection)
 
-> **Status:** Ready
+> **Status:** Complete
 > **Created:** 2026-02-12
+> **Completed:** 2026-02-12
+> **Walkthrough:** 20260212-fileops-postfix-redteam-fixes-walkthrough.md
 > **Author:** agent
 > **Source:** Direct request — fixes from 20260212-fileops-verify-path-postfix-redteam.md
 > **Related Projex:** 20260212-fileops-verify-path-postfix-redteam.md, 20260212-fileops-verify-path-before-remove-walkthrough.md
@@ -29,11 +31,11 @@ The red team identified fixable issues in the verify-path-before-remove implemen
 
 ### Success Criteria
 
-- [ ] IsPlaceholder uses size check: file must equal `len(GeneratePlaceholder(relPath))` to be treated as placeholder
-- [ ] UnlockFile returns clear error when path is directory
-- [ ] ForgetFile returns clear error when path is directory
-- [ ] UnlockFile and ForgetFile reject pipe/socket with clear error
-- [ ] All existing tests pass; new tests cover size-spoof and directory cases
+- [x] IsPlaceholder uses size check: file must equal `len(GeneratePlaceholder(relPath))` to be treated as placeholder
+- [x] UnlockFile returns clear error when path is directory
+- [x] ForgetFile returns clear error when path is directory
+- [x] UnlockFile and ForgetFile reject pipe/socket with clear error
+- [x] All existing tests pass; new tests cover size-spoof and directory cases
 
 ### Out of Scope
 
@@ -243,9 +245,9 @@ Add:
 
 ### Automated Checks
 
-- [ ] `go build ./...` succeeds
-- [ ] `go vet ./...` succeeds
-- [ ] `go test ./internal/core/... -v` — all tests pass (including 4 new tests)
+- [x] `go build ./...` succeeds
+- [x] `go vet ./...` succeeds
+- [x] `go test ./internal/core/... -v` — all tests pass (including 4 new tests)
 
 ### Manual Verification
 

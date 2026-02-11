@@ -201,7 +201,13 @@ func UnlockFile(project *Project, vault *Vault, manifest *Manifest, relPath stri
 
 	// Check if placeholder exists and is actually a placeholder
 	if info, err := os.Lstat(absPath); err == nil {
-		if info.Mode().IsRegular() && !IsPlaceholder(absPath) {
+		if info.Mode().IsDir() {
+			return fmt.Errorf("refusing to unlock %s: path is a directory, expected file or symlink", relPath)
+		}
+		if !info.Mode().IsRegular() && info.Mode()&os.ModeSymlink == 0 {
+			return fmt.Errorf("refusing to unlock %s: path is not a file or symlink (got %s)", relPath, info.Mode().String())
+		}
+		if info.Mode().IsRegular() && !IsPlaceholderFor(absPath, relPath, info.Size()) {
 			return fmt.Errorf("refusing to unlock %s: path contains user data (not a placeholder). Copy your content elsewhere, then run 'ignlnk unlock %s' again", relPath, relPath)
 		}
 		// Remove the placeholder (or symlink) before creating new symlink
@@ -233,7 +239,13 @@ func ForgetFile(project *Project, vault *Vault, manifest *Manifest, relPath stri
 	// Remove whatever is at the original path (placeholder or symlink)
 	// Verify path is expected type before destructive operation
 	if info, err := os.Lstat(absPath); err == nil {
-		if info.Mode().IsRegular() && !IsPlaceholder(absPath) {
+		if info.Mode().IsDir() {
+			return fmt.Errorf("refusing to forget %s: path is a directory, expected file or symlink", relPath)
+		}
+		if !info.Mode().IsRegular() && info.Mode()&os.ModeSymlink == 0 {
+			return fmt.Errorf("refusing to forget %s: path is not a file or symlink (got %s)", relPath, info.Mode().String())
+		}
+		if info.Mode().IsRegular() && !IsPlaceholderFor(absPath, relPath, info.Size()) {
 			return fmt.Errorf("refusing to forget %s: path contains user data (not a placeholder or symlink). Run 'ignlnk lock %s' first to lock, then forget", relPath, relPath)
 		}
 		// Path is symlink or placeholder — safe to remove
@@ -280,6 +292,16 @@ func IsPlaceholder(path string) bool {
 	return string(buf) == placeholderPrefix
 }
 
+// IsPlaceholderFor checks if the file at path is exactly the ignlnk placeholder for relPath.
+// Requires size match (from Lstat) to defeat prefix spoof (file with appended content).
+func IsPlaceholderFor(path, relPath string, size int64) bool {
+	expected := int64(len(GeneratePlaceholder(relPath)))
+	if size != expected {
+		return false
+	}
+	return IsPlaceholder(path)
+}
+
 // FileStatus returns the actual filesystem state of a managed file.
 func FileStatus(project *Project, vault *Vault, entry *FileEntry, relPath string) string {
 	absPath := project.AbsPath(relPath)
@@ -309,7 +331,7 @@ func FileStatus(project *Project, vault *Vault, entry *FileEntry, relPath string
 
 	// Regular file = should be placeholder
 	if info.Mode().IsRegular() {
-		if IsPlaceholder(absPath) {
+		if IsPlaceholderFor(absPath, relPath, info.Size()) {
 			return "locked"
 		}
 		return "tampered"
