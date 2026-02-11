@@ -1,8 +1,8 @@
-# Review: Red Team — ignk MVP Implementation Plan
+# Review: Red Team — ignlnk MVP Implementation Plan
 
 > **Review Date:** 2026-02-11
 > **Reviewer:** Claude (agent)
-> **Reviewed Projex:** `20260211-ignk-mvp-plan-redteam.md`
+> **Reviewed Projex:** `20260211-ignlnk-mvp-plan-redteam.md`
 > **Original Date:** 2026-02-11
 > **Time Since Creation:** Same day (pre-implementation review cycle)
 
@@ -103,11 +103,11 @@ The plan (Step 8) doesn't mention whether `status` and `list` acquire the manife
 
 **Gap 3: Vault location convention**
 
-The red team didn't challenge the `~/.ignk/` vault location. On Linux, `$XDG_DATA_HOME` (`~/.local/share/`) is the conventional location for user data. On systems with small home directory quotas or network-mounted homes, `~/.ignk/vault/` holding potentially large files could be problematic. This is a design-level concern that fits the red team's Forensic mode ("what's hidden").
+The red team didn't challenge the `~/.ignlnk/` vault location. On Linux, `$XDG_DATA_HOME` (`~/.local/share/`) is the conventional location for user data. On systems with small home directory quotas or network-mounted homes, `~/.ignlnk/vault/` holding potentially large files could be problematic. This is a design-level concern that fits the red team's Forensic mode ("what's hidden").
 
 **Gap 4: Display paths in status/list output**
 
-The plan doesn't specify whether `ignk status` and `ignk list` display forward-slash normalized paths (matching manifest) or OS-native paths (matching what the user types). On Windows, showing `config/secrets.yaml` when the user typed `config\secrets.yaml` could confuse. The red team's path separator finding covered storage but not display.
+The plan doesn't specify whether `ignlnk status` and `ignlnk list` display forward-slash normalized paths (matching manifest) or OS-native paths (matching what the user types). On Windows, showing `config/secrets.yaml` when the user typed `config\secrets.yaml` could confuse. The red team's path separator finding covered storage but not display.
 
 **Gap 5: Error recovery — partial lock-all failure**
 
@@ -172,21 +172,21 @@ None required — the gaps above are minor refinements, not missing attack surfa
 
 **Assessment:** The red team is correct to flag this, and the severity rating is justified. Even though concurrent access is uncommon, when it happens the failure is silent and confusing. File locking is a small addition with gofrs/flock. The 5-minute stale lock cleanup addresses the deadlock concern. Valid finding, correct severity.
 
-### Challenge 3: Should the red team have recommended deferring `.ignkfiles` instead of adding doublestar?
+### Challenge 3: Should the red team have recommended deferring `.ignlnkfiles` instead of adding doublestar?
 
 **Evidence for deferring:**
 - MVP could ship sooner with explicit paths only
-- `.ignkfiles` is the only feature that needs doublestar
+- `.ignlnkfiles` is the only feature that needs doublestar
 - Fewer dependencies in MVP
 - Explicit paths are unambiguous — no pattern semantics to get wrong
 
 **Evidence against:**
-- `.ignkfiles` is how `lock-all` discovers new files — without it, `lock-all` only re-locks existing managed files
-- The proposal lists `.ignkfiles` as a core feature, not optional
+- `.ignlnkfiles` is how `lock-all` discovers new files — without it, `lock-all` only re-locks existing managed files
+- The proposal lists `.ignlnkfiles` as a core feature, not optional
 - doublestar is a small, focused dependency (not a framework)
 - Users expect glob patterns to work like `.gitignore` — better to get it right from day one than retrofit later
 
-**Assessment:** The red team correctly offered deferral as Option C but recommended doublestar (Option A). The user chose doublestar. This was the right call — `.ignkfiles` is a core feature, and doublestar is a minimal dependency.
+**Assessment:** The red team correctly offered deferral as Option C but recommended doublestar (Option A). The user chose doublestar. This was the right call — `.ignlnkfiles` is a core feature, and doublestar is a minimal dependency.
 
 ---
 
@@ -217,7 +217,7 @@ None required — the gaps above are minor refinements, not missing attack surfa
 
 ### Action Items
 
-- [ ] Add review stamp to `20260211-ignk-mvp-plan-redteam.md` header
+- [ ] Add review stamp to `20260211-ignlnk-mvp-plan-redteam.md` header
 - [ ] Consider adding the 5 coverage gaps identified here as "supplementary findings" or addendum to the red team, or as items for the plan to address directly
 
 ### Next Review
@@ -239,6 +239,6 @@ None required — the gaps above are minor refinements, not missing attack surfa
 ### Related Projex Status
 | Projex | Status | Notes |
 |--------|--------|-------|
-| `20260211-ignk-cli-tool-proposal.md` | Accepted | Stable, no changes needed |
-| `20260211-ignk-mvp-plan.md` | Draft (rev 2) | Updated with red team remediations |
-| `20260211-ignk-mvp-plan-redteam.md` | Active (under review) | This review |
+| `20260211-ignlnk-cli-tool-proposal.md` | Accepted | Stable, no changes needed |
+| `20260211-ignlnk-mvp-plan.md` | Draft (rev 2) | Updated with red team remediations |
+| `20260211-ignlnk-mvp-plan-redteam.md` | Active (under review) | This review |

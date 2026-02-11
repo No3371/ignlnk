@@ -1,18 +1,18 @@
-# ignk MVP Implementation
+# ignlnk MVP Implementation
 
 > **Status:** Draft (rev 3 — post red team pass 2)
 > **Created:** 2026-02-11
 > **Author:** Claude (agent) + user
-> **Source:** `20260211-ignk-cli-tool-proposal.md`
-> **Related Projex:** `20260211-ignk-cli-tool-proposal.md`, `20260211-ignk-mvp-plan-redteam.md`, `20260211-ignk-mvp-plan-redteam-review.md`, `20260211-ignk-mvp-plan-redteam-2.md`
+> **Source:** `20260211-ignlnk-cli-tool-proposal.md`
+> **Related Projex:** `20260211-ignlnk-cli-tool-proposal.md`, `20260211-ignlnk-mvp-plan-redteam.md`, `20260211-ignlnk-mvp-plan-redteam-review.md`, `20260211-ignlnk-mvp-plan-redteam-2.md`
 
 ---
 
 ## Summary
 
-Implement the MVP of `ignk` — a Go CLI tool that protects sensitive files from AI agents using placeholder files and symlinks. Covers project initialization, lock/unlock operations, file listing/status, forget, bulk operations, and `.ignkfiles` declarative patterns.
+Implement the MVP of `ignlnk` — a Go CLI tool that protects sensitive files from AI agents using placeholder files and symlinks. Covers project initialization, lock/unlock operations, file listing/status, forget, bulk operations, and `.ignlnkfiles` declarative patterns.
 
-**Scope:** All core commands (init, lock, unlock, status, list, forget, lock-all, unlock-all) + `.ignkfiles` support
+**Scope:** All core commands (init, lock, unlock, status, list, forget, lock-all, unlock-all) + `.ignlnkfiles` support
 **Estimated Changes:** ~15 new files
 
 ---
@@ -21,19 +21,19 @@ Implement the MVP of `ignk` — a Go CLI tool that protects sensitive files from
 
 ### Problem / Gap / Need
 
-No implementation exists yet. The accepted proposal (`20260211-ignk-cli-tool-proposal.md`) defines the design — this plan turns it into working code.
+No implementation exists yet. The accepted proposal (`20260211-ignlnk-cli-tool-proposal.md`) defines the design — this plan turns it into working code.
 
 ### Success Criteria
 
-- [ ] `ignk init` creates `.ignk/` in project root, registers project in `~/.ignk/index.json`, creates vault directory
-- [ ] `ignk lock <path>...` moves files to vault, writes placeholders, updates manifest
-- [ ] `ignk unlock <path>...` replaces placeholders with symlinks to vault copies
-- [ ] `ignk status` shows managed files and their current state (locked/unlocked/dirty/missing)
-- [ ] `ignk list` lists all managed files
-- [ ] `ignk forget <path>...` restores files from vault, removes from management
-- [ ] `ignk lock-all` locks all managed + `.ignkfiles`-matched files
-- [ ] `ignk unlock-all` unlocks all managed files
-- [ ] `.ignkfiles` patterns are parsed and used by `lock-all` to discover new files
+- [ ] `ignlnk init` creates `.ignlnk/` in project root, registers project in `~/.ignlnk/index.json`, creates vault directory
+- [ ] `ignlnk lock <path>...` moves files to vault, writes placeholders, updates manifest
+- [ ] `ignlnk unlock <path>...` replaces placeholders with symlinks to vault copies
+- [ ] `ignlnk status` shows managed files and their current state (locked/unlocked/dirty/missing)
+- [ ] `ignlnk list` lists all managed files
+- [ ] `ignlnk forget <path>...` restores files from vault, removes from management
+- [ ] `ignlnk lock-all` locks all managed + `.ignlnkfiles`-matched files
+- [ ] `ignlnk unlock-all` unlocks all managed files
+- [ ] `.ignlnkfiles` patterns are parsed and used by `lock-all` to discover new files
 - [ ] Placeholder content includes the actual file path
 - [ ] SHA-256 hash verification on lock and unlock
 - [ ] Idempotent commands (lock on locked = no-op, unlock on unlocked = no-op)
@@ -49,8 +49,8 @@ No implementation exists yet. The accepted proposal (`20260211-ignk-cli-tool-pro
 
 ### Out of Scope
 
-- Git pre-commit hooks (`ignk check` / `ignk hook install`)
-- `ignk relocate` command
+- Git pre-commit hooks (`ignlnk check` / `ignlnk hook install`)
+- `ignlnk relocate` command
 - goreleaser / release automation (just needs to `go build`)
 - Shell completions
 - Copy-swap fallback (`--no-symlink`)
@@ -70,24 +70,24 @@ Empty repository. Greenfield Go project.
 | `go.mod` | Module definition | Create |
 | `main.go` | Entry point | Create |
 | `cmd/app.go` | Root CLI command + subcommand registration | Create |
-| `cmd/init.go` | `ignk init` command | Create |
-| `cmd/lock.go` | `ignk lock` command | Create |
-| `cmd/unlock.go` | `ignk unlock` command | Create |
-| `cmd/status.go` | `ignk status` command | Create |
-| `cmd/list.go` | `ignk list` command | Create |
-| `cmd/forget.go` | `ignk forget` command | Create |
-| `cmd/lockall.go` | `ignk lock-all` + `ignk unlock-all` commands | Create |
+| `cmd/init.go` | `ignlnk init` command | Create |
+| `cmd/lock.go` | `ignlnk lock` command | Create |
+| `cmd/unlock.go` | `ignlnk unlock` command | Create |
+| `cmd/status.go` | `ignlnk status` command | Create |
+| `cmd/list.go` | `ignlnk list` command | Create |
+| `cmd/forget.go` | `ignlnk forget` command | Create |
+| `cmd/lockall.go` | `ignlnk lock-all` + `ignlnk unlock-all` commands | Create |
 | `internal/core/project.go` | Project root detection, manifest types + R/W | Create |
 | `internal/core/vault.go` | Vault resolution, central index types + R/W | Create |
 | `internal/core/fileops.go` | Lock/unlock/forget operations, hashing, placeholder generation | Create |
-| `internal/ignkfiles/parser.go` | `.ignkfiles` pattern parsing and matching | Create |
+| `internal/ignlnkfiles/parser.go` | `.ignlnkfiles` pattern parsing and matching | Create |
 | `.gitignore` | Ignore build artifacts | Create |
 
 ### Dependencies
 
 - `github.com/urfave/cli/v3` — CLI framework (pin exact version in go.mod)
 - `github.com/gofrs/flock` — Cross-platform file locking (flock on Unix, LockFileEx on Windows)
-- `github.com/sabhiram/go-gitignore` — `.ignkfiles` pattern matching with full gitignore semantics (replaces doublestar)
+- `github.com/sabhiram/go-gitignore` — `.ignlnkfiles` pattern matching with full gitignore semantics (replaces doublestar)
 - `github.com/natefinch/atomic` — Cross-platform atomic file writes (wraps MoveFileEx on Windows)
 - `encoding/json` (stdlib) — Manifest and index serialization (replaces koanf)
 
@@ -107,24 +107,24 @@ Empty repository. Greenfield Go project.
 The implementation is structured bottom-up: core types and operations first, then CLI commands that compose them. The package layout:
 
 ```
-ignk/
+ignlnk/
 ├── main.go                         # Entry point
 ├── cmd/
 │   ├── app.go                      # Root command, subcommand wiring
-│   ├── init.go                     # ignk init
-│   ├── lock.go                     # ignk lock
-│   ├── unlock.go                   # ignk unlock
-│   ├── status.go                   # ignk status
-│   ├── list.go                     # ignk list
-│   ├── forget.go                   # ignk forget
-│   └── lockall.go                  # ignk lock-all, ignk unlock-all
+│   ├── init.go                     # ignlnk init
+│   ├── lock.go                     # ignlnk lock
+│   ├── unlock.go                   # ignlnk unlock
+│   ├── status.go                   # ignlnk status
+│   ├── list.go                     # ignlnk list
+│   ├── forget.go                   # ignlnk forget
+│   └── lockall.go                  # ignlnk lock-all, ignlnk unlock-all
 ├── internal/
 │   ├── core/
 │   │   ├── project.go              # Project detection, manifest
 │   │   ├── vault.go                # Vault/index management
 │   │   └── fileops.go              # Lock/unlock/forget, hashing, placeholders
-│   └── ignkfiles/
-│       └── parser.go               # .ignkfiles pattern matching
+│   └── ignlnkfiles/
+│       └── parser.go               # .ignlnkfiles pattern matching
 ├── go.mod
 └── .gitignore
 ```
@@ -145,7 +145,7 @@ ignk/
 
 `go.mod`:
 ```go
-module github.com/user/ignk
+module github.com/user/ignlnk
 
 go 1.23
 ```
@@ -165,7 +165,7 @@ import (
     "fmt"
     "os"
 
-    "github.com/user/ignk/cmd"
+    "github.com/user/ignlnk/cmd"
 )
 
 func main() {
@@ -179,8 +179,8 @@ func main() {
 
 `.gitignore`:
 ```
-ignk
-ignk.exe
+ignlnk
+ignlnk.exe
 ```
 
 **Verification:** `go build` compiles without errors.
@@ -200,7 +200,7 @@ ignk.exe
 Define types:
 
 ```go
-// Manifest represents .ignk/manifest.json
+// Manifest represents .ignlnk/manifest.json
 type Manifest struct {
     Version int                    `json:"version"`
     Files   map[string]*FileEntry  `json:"files"`
@@ -213,20 +213,20 @@ type FileEntry struct {
     Hash     string `json:"hash"`     // "sha256:<hex>"
 }
 
-// Project represents a detected ignk project
+// Project represents a detected ignlnk project
 type Project struct {
     Root         string   // Absolute path to project root
-    IgnkDir      string   // Absolute path to .ignk/
-    ManifestPath string   // Absolute path to .ignk/manifest.json
+    ignlnkDir      string   // Absolute path to .ignlnk/
+    ManifestPath string   // Absolute path to .ignlnk/manifest.json
 }
 ```
 
 Functions:
-- `FindProject(startDir string) (*Project, error)` — walk up from `startDir` looking for `.ignk/` directory. Return error if not found.
-- `InitProject(dir string) (*Project, error)` — create `.ignk/` and empty `manifest.json` in `dir`.
+- `FindProject(startDir string) (*Project, error)` — walk up from `startDir` looking for `.ignlnk/` directory. Return error if not found.
+- `InitProject(dir string) (*Project, error)` — create `.ignlnk/` and empty `manifest.json` in `dir`.
 - `(p *Project) LoadManifest() (*Manifest, error)` — read and parse `manifest.json` using `encoding/json`.
 - `(p *Project) SaveManifest(m *Manifest) error` — write `manifest.json` atomically via `atomic.WriteFile` (handles MoveFileEx on Windows).
-- `(p *Project) LockManifest() (unlock func(), err error)` — acquire exclusive file lock on `.ignk/manifest.lock` using `gofrs/flock` with a 30-second timeout (`TryLockContext`). Returns unlock function for defer. On timeout, returns error: "could not acquire lock — another ignk operation may be running. If no other operation is active, delete `.ignk/manifest.lock` and retry." No PID-based stale detection — flock auto-releases on process exit.
+- `(p *Project) LockManifest() (unlock func(), err error)` — acquire exclusive file lock on `.ignlnk/manifest.lock` using `gofrs/flock` with a 30-second timeout (`TryLockContext`). Returns unlock function for defer. On timeout, returns error: "could not acquire lock — another ignlnk operation may be running. If no other operation is active, delete `.ignlnk/manifest.lock` and retry." No PID-based stale detection — flock auto-releases on process exit.
 - `(p *Project) RelPath(absPath string) (string, error)` — convert absolute path to project-relative, forward-slash-normalized path. Uses `filepath.Rel` then `filepath.ToSlash`. Rejects paths that resolve to `..` (outside project root).
 - `(p *Project) AbsPath(relPath string) string` — convert forward-slash relative path to OS-native absolute path. Uses `filepath.FromSlash` then `filepath.Join(p.Root, ...)`.
 
@@ -242,7 +242,7 @@ Functions:
 
 **Rationale:** Project detection mirrors git's approach of walking up directories. Atomic manifest writes prevent corruption from crashes. File-based locking prevents corruption from concurrent invocations. Forward-slash normalization ensures cross-platform manifest portability.
 
-**Verification:** Unit test: create temp dir with `.ignk/manifest.json`, verify `FindProject` finds it. Verify `SaveManifest` → `LoadManifest` roundtrip preserves data. Verify `RelPath` produces forward slashes on Windows. Verify `RelPath` rejects `../outside`. Verify concurrent `SaveManifest` calls don't lose updates (run two goroutines writing different keys).
+**Verification:** Unit test: create temp dir with `.ignlnk/manifest.json`, verify `FindProject` finds it. Verify `SaveManifest` → `LoadManifest` roundtrip preserves data. Verify `RelPath` produces forward slashes on Windows. Verify `RelPath` rejects `../outside`. Verify concurrent `SaveManifest` calls don't lose updates (run two goroutines writing different keys).
 
 ---
 
@@ -259,7 +259,7 @@ Functions:
 Define types:
 
 ```go
-// Index represents ~/.ignk/index.json
+// Index represents ~/.ignlnk/index.json
 type Index struct {
     Version  int                       `json:"version"`
     Projects map[string]*ProjectEntry  `json:"projects"` // UID -> entry
@@ -274,20 +274,20 @@ type ProjectEntry struct {
 // Vault represents a resolved vault for a specific project
 type Vault struct {
     UID  string // Short random hex ID
-    Dir  string // ~/.ignk/vault/<uid>/
+    Dir  string // ~/.ignlnk/vault/<uid>/
 }
 ```
 
 Functions:
-- `IgnkHome() (string, error)` — returns `~/.ignk/`, creating it if it doesn't exist.
-- `LockIndex() (unlock func(), err error)` — acquire exclusive file lock on `~/.ignk/index.lock` using `gofrs/flock` with 30-second timeout. Same protocol as `LockManifest`: returns unlock function, no PID-based stale detection.
-- `LoadIndex() (*Index, error)` — read `~/.ignk/index.json` using `encoding/json`. Return empty index if file doesn't exist.
-- `SaveIndex(idx *Index) error` — write `~/.ignk/index.json` atomically via `atomic.WriteFile`.
+- `ignlnkHome() (string, error)` — returns `~/.ignlnk/`, creating it if it doesn't exist.
+- `LockIndex() (unlock func(), err error)` — acquire exclusive file lock on `~/.ignlnk/index.lock` using `gofrs/flock` with 30-second timeout. Same protocol as `LockManifest`: returns unlock function, no PID-based stale detection.
+- `LoadIndex() (*Index, error)` — read `~/.ignlnk/index.json` using `encoding/json`. Return empty index if file doesn't exist.
+- `SaveIndex(idx *Index) error` — write `~/.ignlnk/index.json` atomically via `atomic.WriteFile`.
 - `RegisterProject(projectRoot string) (*Vault, error)` — acquire index lock, look up project in index by root path. If found, return existing vault. If not, generate UID (8 hex chars via `crypto/rand`), create vault dir, add to index, save. Release lock.
 - `ResolveVault(projectRoot string) (*Vault, error)` — look up project in index, return vault. Error if not registered.
 - `(v *Vault) FilePath(relPath string) string` — return `<vault.Dir>/<filepath.FromSlash(relPath)>`. Converts forward-slash manifest path to OS-native vault path.
 - `generateUID() string` — 4 random bytes → 8 hex characters.
-- `CheckSymlinkSupport(testDir string) error` — create and remove a test symlink in `testDir` (should be `.ignk/` to test the actual project filesystem, not `os.TempDir()` which may be on a different volume). Returns nil if symlinks work, descriptive error with remediation instructions if not (e.g., "Windows Developer Mode required: Settings > Update & Security > For Developers").
+- `CheckSymlinkSupport(testDir string) error` — create and remove a test symlink in `testDir` (should be `.ignlnk/` to test the actual project filesystem, not `os.TempDir()` which may be on a different volume). Returns nil if symlinks work, descriptive error with remediation instructions if not (e.g., "Windows Developer Mode required: Settings > Update & Security > For Developers").
 
 **Rationale:** UID generation uses `crypto/rand` for unpredictability. Index lookup by project root (not UID) means the project never needs to know its own UID. Index locking prevents UID collision from concurrent `init` calls. `CheckSymlinkSupport` catches the Windows Developer Mode requirement before any real operation fails.
 
@@ -326,7 +326,7 @@ func UnlockFile(project *Project, vault *Vault, manifest *Manifest, relPath stri
 // ForgetFile restores a file from vault and removes it from management
 func ForgetFile(project *Project, vault *Vault, manifest *Manifest, relPath string) error
 
-// IsPlaceholder checks if a file at the given path is an ignk placeholder
+// IsPlaceholder checks if a file at the given path is an ignlnk placeholder
 func IsPlaceholder(path string) bool
 
 // FileStatus returns the actual filesystem state of a managed file
@@ -335,10 +335,10 @@ func FileStatus(project *Project, vault *Vault, entry *FileEntry, relPath string
 
 `GeneratePlaceholder` output:
 ```
-[ignk:protected] This file is protected by ignk.
+[ignlnk:protected] This file is protected by ignlnk.
 To view its contents, ask the user to run:
 
-    ignk unlock <relPath>
+    ignlnk unlock <relPath>
 
 Do NOT attempt to modify or bypass this file.
 ```
@@ -356,7 +356,7 @@ Do NOT attempt to modify or bypass this file.
 10. Write placeholder over original atomically via `atomic.WriteFile` (handles MoveFileEx on Windows, no manual temp file management needed)
 12. Update manifest entry: state="locked", hash, lockedAt=now
 
-Note: the original file is never removed until step 8 confirms the vault copy is intact. If the process is interrupted before step 10, the original file remains untouched. If interrupted between 10 and 11, the file is replaced with a placeholder but the manifest is stale — next `ignk status` detects the inconsistency.
+Note: the original file is never removed until step 8 confirms the vault copy is intact. If the process is interrupted before step 10, the original file remains untouched. If interrupted between 10 and 11, the file is replaced with a placeholder but the manifest is stale — next `ignlnk status` detects the inconsistency.
 
 `UnlockFile` logic:
 1. **Symlink capability check:** on first call in session, run `CheckSymlinkSupport()`. Cache result. If symlinks unsupported, return error with actionable message (Windows: "enable Developer Mode in Settings > Update & Security > For Developers")
@@ -377,7 +377,7 @@ Note: the original file is never removed until step 8 confirms the vault copy is
 5. Remove from manifest (in-memory only — caller saves)
 
 `IsPlaceholder`:
-- Read first line, check for `[ignk:protected]` prefix
+- Read first line, check for `[ignlnk:protected]` prefix
 
 `FileStatus` returns one of:
 - `"locked"` — placeholder exists at path, vault file exists
@@ -389,7 +389,7 @@ Note: the original file is never removed until step 8 confirms the vault copy is
 
 **Save protocol — caller-saves only:** All three operations (`LockFile`, `UnlockFile`, `ForgetFile`) modify the in-memory manifest but never call `SaveManifest` themselves. The caller in cmd/ is responsible for saving once after the loop. This ensures consistent behavior and enables partial-failure recovery (see below).
 
-**Partial failure handling:** If a multi-file command (e.g., `ignk lock a.txt b.txt c.txt`) succeeds for `a.txt` and `b.txt` but fails on `c.txt`:
+**Partial failure handling:** If a multi-file command (e.g., `ignlnk lock a.txt b.txt c.txt`) succeeds for `a.txt` and `b.txt` but fails on `c.txt`:
 1. Print per-file results as they happen: `locked: a.txt`, `locked: b.txt`, `error: c.txt: <reason>`
 2. Save the manifest with all successfully completed operations (`a.txt` and `b.txt` tracked)
 3. Return an error indicating partial completion: "2 of 3 files locked, 1 failed"
@@ -405,17 +405,17 @@ This prevents orphaned files (locked on disk but absent from manifest).
 
 ---
 
-### Step 5: `.ignkfiles` Parser
+### Step 5: `.ignlnkfiles` Parser
 
-**Objective:** Parse `.ignkfiles` patterns and match against project files.
+**Objective:** Parse `.ignlnkfiles` patterns and match against project files.
 
 **Files:**
 
-- `internal/ignkfiles/parser.go`
+- `internal/ignlnkfiles/parser.go`
 
 **Changes:**
 
-`.ignkfiles` format — full gitignore semantics:
+`.ignlnkfiles` format — full gitignore semantics:
 ```
 # Comments (lines starting with #)
 # Empty lines ignored
@@ -438,11 +438,11 @@ Note: `*.pem` (no slash) matches `.pem` files at any depth — this is gitignore
 
 Functions:
 ```go
-// Load reads a .ignkfiles file and compiles the patterns
+// Load reads a .ignlnkfiles file and compiles the patterns
 func Load(path string) (*ignore.GitIgnore, error)
 
-// DiscoverFiles walks the project tree and returns all files matching .ignkfiles patterns
-// Excludes .ignk/ directory and already-managed files
+// DiscoverFiles walks the project tree and returns all files matching .ignlnkfiles patterns
+// Excludes .ignlnk/ directory and already-managed files
 func DiscoverFiles(projectRoot string, ignorer *ignore.GitIgnore, manifest *core.Manifest) ([]string, error)
 ```
 
@@ -453,13 +453,13 @@ func DiscoverFiles(projectRoot string, ignorer *ignore.GitIgnore, manifest *core
 
 `DiscoverFiles` logic:
 - `filepath.WalkDir` from project root
-- Skip `.ignk/`, `.git/`, and other dotdirs
+- Skip `.ignlnk/`, `.git/`, and other dotdirs
 - For each regular file, compute relative path (forward-slash normalized via `filepath.ToSlash`)
 - Call `ignorer.MatchesPath(relPath)` — returns true if file matches patterns
 - Exclude files already in manifest
 - Return list of relative paths (forward-slash normalized)
 
-**Rationale:** `go-gitignore` replaces `doublestar` because doublestar is a general-purpose glob library that doesn't implement gitignore's "slash-less pattern matches at any depth" rule. With doublestar, `*.pem` only matches root-level `.pem` files — `config/ssl/server.pem` would require `**/*.pem`. Since `.ignkfiles` is documented as "like .gitignore" and users will copy patterns from their `.gitignore` experience, the matching library must implement actual gitignore semantics. `go-gitignore` does this natively: slash-less patterns, `**` globstar, `!` negation, `/` anchoring — all handled correctly.
+**Rationale:** `go-gitignore` replaces `doublestar` because doublestar is a general-purpose glob library that doesn't implement gitignore's "slash-less pattern matches at any depth" rule. With doublestar, `*.pem` only matches root-level `.pem` files — `config/ssl/server.pem` would require `**/*.pem`. Since `.ignlnkfiles` is documented as "like .gitignore" and users will copy patterns from their `.gitignore` experience, the matching library must implement actual gitignore semantics. `go-gitignore` does this natively: slash-less patterns, `**` globstar, `!` negation, `/` anchoring — all handled correctly.
 
 **Verification:** Unit test: verify `*.pem` matches BOTH `key.pem` AND `config/ssl/server.pem` (gitignore's slash-less = match anywhere). Verify `**/*.pem` also works. Verify `config/*.yaml` matches `config/secrets.yaml` but NOT `config/sub/deep.yaml`. Test negation (`!config/secrets.example.yaml`). Test anchoring (`/root-only.env` matches only at root). Test empty file. Test comments.
 
@@ -467,7 +467,7 @@ func DiscoverFiles(projectRoot string, ignorer *ignore.GitIgnore, manifest *core
 
 ### Step 6: CLI Commands — `init`
 
-**Objective:** Wire up `ignk init` command.
+**Objective:** Wire up `ignlnk init` command.
 
 **Files:**
 
@@ -480,7 +480,7 @@ func DiscoverFiles(projectRoot string, ignorer *ignore.GitIgnore, manifest *core
 ```go
 func NewApp() *cli.Command {
     return &cli.Command{
-        Name:    "ignk",
+        Name:    "ignlnk",
         Usage:   "Protect sensitive files from AI coding agents",
         Commands: []*cli.Command{
             initCmd(),
@@ -498,19 +498,19 @@ func NewApp() *cli.Command {
 
 `cmd/init.go`:
 - Get current working directory
-- Check if already initialized (`.ignk/` exists) — warn and exit
-- **Symlink capability check:** call `core.CheckSymlinkSupport()`. If fails, print warning (not error) — init can proceed, but unlock won't work. Message: "Warning: symlinks not supported on this system. ignk unlock will not work until Developer Mode is enabled (Windows: Settings > Update & Security > For Developers)."
+- Check if already initialized (`.ignlnk/` exists) — warn and exit
+- **Symlink capability check:** call `core.CheckSymlinkSupport()`. If fails, print warning (not error) — init can proceed, but unlock won't work. Message: "Warning: symlinks not supported on this system. ignlnk unlock will not work until Developer Mode is enabled (Windows: Settings > Update & Security > For Developers)."
 - Call `core.InitProject(cwd)`
 - Call `core.RegisterProject(cwd)` (acquires index lock internally)
-- Print: `Initialized ignk in <dir>` and `Vault: <vault.Dir>`
+- Print: `Initialized ignlnk in <dir>` and `Vault: <vault.Dir>`
 
-**Verification:** Run `ignk init` in a temp dir. Verify `.ignk/manifest.json` created. Verify `~/.ignk/index.json` updated. Run again — should warn "already initialized". On Windows without Developer Mode — should print symlink warning but succeed.
+**Verification:** Run `ignlnk init` in a temp dir. Verify `.ignlnk/manifest.json` created. Verify `~/.ignlnk/index.json` updated. Run again — should warn "already initialized". On Windows without Developer Mode — should print symlink warning but succeed.
 
 ---
 
 ### Step 7: CLI Commands — `lock` and `unlock`
 
-**Objective:** Wire up `ignk lock` and `ignk unlock` commands.
+**Objective:** Wire up `ignlnk lock` and `ignlnk unlock` commands.
 
 **Files:**
 
@@ -544,13 +544,13 @@ func NewApp() *cli.Command {
 
 Both commands accept variadic path arguments (`cmd.Args().Slice()`).
 
-**Verification:** Create test file, `ignk lock test.txt`, verify placeholder. `ignk unlock test.txt`, verify symlink. Verify idempotent behavior.
+**Verification:** Create test file, `ignlnk lock test.txt`, verify placeholder. `ignlnk unlock test.txt`, verify symlink. Verify idempotent behavior.
 
 ---
 
 ### Step 8: CLI Commands — `status` and `list`
 
-**Objective:** Wire up `ignk status` and `ignk list` commands.
+**Objective:** Wire up `ignlnk status` and `ignlnk list` commands.
 
 **Files:**
 
@@ -576,13 +576,13 @@ Both commands accept variadic path arguments (`cmd.Args().Slice()`).
 - Print each managed file path, one per line (OS-native paths via `filepath.FromSlash`)
 - Simpler than status — just filenames, no state checking
 
-**Verification:** Lock some files, unlock others. Run `ignk status` — verify output matches. Run `ignk list` — verify all managed files shown.
+**Verification:** Lock some files, unlock others. Run `ignlnk status` — verify output matches. Run `ignlnk list` — verify all managed files shown.
 
 ---
 
 ### Step 9: CLI Commands — `forget`
 
-**Objective:** Wire up `ignk forget` command.
+**Objective:** Wire up `ignlnk forget` command.
 
 **Files:**
 
@@ -599,7 +599,7 @@ Both commands accept variadic path arguments (`cmd.Args().Slice()`).
 - Save manifest once at end (including on partial failure)
 - If any file failed, return error: "N of M files forgotten, K failed"
 
-**Verification:** Lock a file, then `ignk forget` it. Verify original file restored at original path, removed from manifest and vault.
+**Verification:** Lock a file, then `ignlnk forget` it. Verify original file restored at original path, removed from manifest and vault.
 
 ---
 
@@ -617,8 +617,8 @@ Both commands accept variadic path arguments (`cmd.Args().Slice()`).
 - Find project, resolve vault
 - **Acquire manifest lock** (`project.LockManifest()`, defer unlock)
 - Load manifest
-- Parse `.ignkfiles` if it exists (using `ignkfiles.Load`)
-- Discover new files matching patterns (`ignkfiles.DiscoverFiles`)
+- Parse `.ignlnkfiles` if it exists (using `ignlnkfiles.Load`)
+- Discover new files matching patterns (`ignlnkfiles.DiscoverFiles`)
 - **`--dry-run` mode:** if flag set, print list of files that would be locked and exit without locking. No filesystem mutations.
 - Otherwise: lock all (already-managed unlocked files + newly discovered files)
 - Register SIGINT handler that saves manifest before exit
@@ -637,7 +637,7 @@ Both commands accept variadic path arguments (`cmd.Args().Slice()`).
 - Save manifest once at end (including on partial failure)
 - Print summary: `unlocked N files`
 
-**Verification:** Create `.ignkfiles` with patterns, create matching files. Run `ignk lock-all` — verify all matched files locked. Run `ignk unlock-all` — verify all unlocked.
+**Verification:** Create `.ignlnkfiles` with patterns, create matching files. Run `ignlnk lock-all` — verify all matched files locked. Run `ignlnk unlock-all` — verify all unlocked.
 
 ---
 
@@ -650,23 +650,23 @@ Both commands accept variadic path arguments (`cmd.Args().Slice()`).
 **Changes:**
 
 ```bash
-go build -o ignk .
+go build -o ignlnk .
 ```
 
 Run through the full workflow:
 ```bash
 mkdir testproject && cd testproject
-ignk init
+ignlnk init
 echo "SECRET=abc123" > .env
 echo "password: hunter2" > secrets.yaml
-ignk lock .env secrets.yaml
+ignlnk lock .env secrets.yaml
 cat .env                    # Should show placeholder
-ignk status                 # Should show both locked
-ignk unlock .env            # Should create symlink
+ignlnk status                 # Should show both locked
+ignlnk unlock .env            # Should create symlink
 cat .env                    # Should show SECRET=abc123
-ignk lock-all               # Should re-lock .env
-ignk forget secrets.yaml    # Should restore original
-ignk list                   # Should show only .env
+ignlnk lock-all               # Should re-lock .env
+ignlnk forget secrets.yaml    # Should restore original
+ignlnk list                   # Should show only .env
 ```
 
 **Verification:** All commands execute without error. File states match expectations.
@@ -687,26 +687,26 @@ ignk list                   # Should show only .env
 - [ ] Placeholder content contains actual file path
 - [ ] Symlink target points to correct vault path
 - [ ] Hash mismatch detected if vault file is manually altered
-- [ ] `.ignkfiles` patterns correctly discover files — `*.pem` matches `config/ssl/server.pem` (gitignore slash-less semantics)
+- [ ] `.ignlnkfiles` patterns correctly discover files — `*.pem` matches `config/ssl/server.pem` (gitignore slash-less semantics)
 - [ ] Works from subdirectory (project root detected by walking up)
-- [ ] Concurrent `ignk lock` in two terminals doesn't lose manifest entries
-- [ ] `ignk lock ../outside-project/file` is rejected
+- [ ] Concurrent `ignlnk lock` in two terminals doesn't lose manifest entries
+- [ ] `ignlnk lock ../outside-project/file` is rejected
 - [ ] Manifest paths use forward slashes regardless of OS
-- [ ] On Windows without Developer Mode: `ignk init` warns, `ignk unlock` fails with clear message
+- [ ] On Windows without Developer Mode: `ignlnk init` warns, `ignlnk unlock` fails with clear message
 - [ ] Large file (>100MB) produces warning; >1GB without `--force` produces error
-- [ ] Ctrl+C during `ignk lock` does not lose the original file
-- [ ] Ctrl+C during `ignk lock-all` (after N files) saves manifest with N files tracked
-- [ ] Partial failure: `ignk lock a.txt b.txt nonexistent.txt` locks a.txt and b.txt, saves both to manifest, reports error for nonexistent.txt
-- [ ] `ignk lock-all --dry-run` lists files without locking them
-- [ ] `ignk status` does not hang while `ignk lock-all` is running in another terminal
-- [ ] Lock acquisition timeout: `ignk lock` prints actionable message if lock held >30s
+- [ ] Ctrl+C during `ignlnk lock` does not lose the original file
+- [ ] Ctrl+C during `ignlnk lock-all` (after N files) saves manifest with N files tracked
+- [ ] Partial failure: `ignlnk lock a.txt b.txt nonexistent.txt` locks a.txt and b.txt, saves both to manifest, reports error for nonexistent.txt
+- [ ] `ignlnk lock-all --dry-run` lists files without locking them
+- [ ] `ignlnk status` does not hang while `ignlnk lock-all` is running in another terminal
+- [ ] Lock acquisition timeout: `ignlnk lock` prints actionable message if lock held >30s
 
 ### Acceptance Criteria Validation
 
 | Criterion | How to Verify | Expected Result |
 |-----------|---------------|-----------------|
-| Lock moves file to vault | Check vault dir after `ignk lock` | File exists in `~/.ignk/vault/<uid>/<path>` |
-| Placeholder content correct | `cat` a locked file | Shows `[ignk:protected]` with correct path |
+| Lock moves file to vault | Check vault dir after `ignlnk lock` | File exists in `~/.ignlnk/vault/<uid>/<path>` |
+| Placeholder content correct | `cat` a locked file | Shows `[ignlnk:protected]` with correct path |
 | Unlock creates symlink | `ls -la` (or `dir`) an unlocked file | Shows symlink → vault path |
 | Forget restores original | `cat` a forgotten file | Shows original content, not in manifest |
 | Cross-platform symlinks | `go build` + test on Windows | Symlinks created via `os.Symlink` |
@@ -725,11 +725,11 @@ Greenfield project — if implementation fails, delete all files and start over.
 
 - Go 1.23+ is available on the development machine
 - Symlink creation may require Developer Mode on Windows — detected at init/unlock with actionable error
-- `~/.ignk/` is a writable location on all target platforms. Default location; future `$IGNK_HOME` env var override planned for post-MVP
+- `~/.ignlnk/` is a writable location on all target platforms. Default location; future `$ignlnk_HOME` env var override planned for post-MVP
 
 ### Known Limitations (documented in red team)
 
-- **Symlink target path leakage:** when a file is unlocked, `ls -la` or `readlink` reveals the vault path including UID (e.g., `~/.ignk/vault/a1b2c3d4/.env`). This weakens the "opaque UID" protection claim from the proposal. Protection against vault discovery is only effective in the locked state. This is an inherent limitation of symlinks and is accepted for MVP.
+- **Symlink target path leakage:** when a file is unlocked, `ls -la` or `readlink` reveals the vault path including UID (e.g., `~/.ignlnk/vault/a1b2c3d4/.env`). This weakens the "opaque UID" protection claim from the proposal. Protection against vault discovery is only effective in the locked state. This is an inherent limitation of symlinks and is accepted for MVP.
 - **Unlocked = fully exposed:** when unlocked, any process (including AI agents) reads the file transparently through the symlink. Protection exists only in the locked state. This is by design but must be clearly communicated.
 - **No copy-swap fallback:** Windows users without Developer Mode cannot unlock files. Detected and surfaced as a clear error, but no workaround exists in MVP.
 

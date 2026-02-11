@@ -1,15 +1,15 @@
-# ignk — Symlink-Based Sensitive File Protection for AI Agents
+# ignlnk — Symlink-Based Sensitive File Protection for AI Agents
 
 > **Status:** Accepted
 > **Created:** 2026-02-11
 > **Author:** Claude (agent) + user
-> **Related Projex:** `20260211-ignk-mvp-plan.md`
+> **Related Projex:** `20260211-ignlnk-mvp-plan.md`
 
 ---
 
 ## Summary
 
-`ignk` is a CLI tool that protects sensitive files from AI coding agents by replacing them with placeholder stubs and storing the originals in a centralized vault outside the project tree. When an AI agent reads a protected path, it sees only a message instructing the user to run `ignk unlock <actual-path>`. Unlocking swaps the placeholder for a symlink to the vault copy, granting access on demand.
+`ignlnk` is a CLI tool that protects sensitive files from AI coding agents by replacing them with placeholder stubs and storing the originals in a centralized vault outside the project tree. When an AI agent reads a protected path, it sees only a message instructing the user to run `ignlnk unlock <actual-path>`. Unlocking swaps the placeholder for a symlink to the vault copy, granting access on demand.
 
 ---
 
@@ -39,29 +39,29 @@ AI coding agents are proliferating rapidly. Users routinely switch between multi
 
 ### Overview
 
-`ignk` manages two states for each protected file:
+`ignlnk` manages two states for each protected file:
 
 | State | What's at the original path | Real file location |
 |-------|----------------------------|-------------------|
-| **Locked** (default) | A small placeholder text file | Stored in centralized vault (`~/.ignk/vault/...`) |
-| **Unlocked** | A symlink pointing to the vault copy | `~/.ignk/vault/<full-original-path>` |
+| **Locked** (default) | A small placeholder text file | Stored in centralized vault (`~/.ignlnk/vault/...`) |
+| **Unlocked** | A symlink pointing to the vault copy | `~/.ignlnk/vault/<full-original-path>` |
 
 The placeholder content is deliberately designed to be understood by AI agents:
 
 ```
-[ignk:protected] This file is protected by ignk.
-To view its contents, ask the user to run: ignk unlock <actual-path>
+[ignlnk:protected] This file is protected by ignlnk.
+To view its contents, ask the user to run: ignlnk unlock <actual-path>
 ```
 
 ### Centralized Vault with UID Isolation
 
-The vault lives **outside all project trees** at `~/.ignk/vault/`. Each project gets a unique ID, and files are stored under that UID — inspired by how Sandboxie virtualizes filesystem paths, but without exposing the real project path:
+The vault lives **outside all project trees** at `~/.ignlnk/vault/`. Each project gets a unique ID, and files are stored under that UID — inspired by how Sandboxie virtualizes filesystem paths, but without exposing the real project path:
 
 ```
-~/.ignk/
+~/.ignlnk/
 ├── index.json              # Maps UIDs ↔ project roots
 └── vault/
-    ├── a1b2c3d4/           # UID for S:\Repos\ignk
+    ├── a1b2c3d4/           # UID for S:\Repos\ignlnk
     │   ├── .env
     │   └── config/
     │       └── secrets.yaml
@@ -72,21 +72,21 @@ The vault lives **outside all project trees** at `~/.ignk/vault/`. Each project 
 This design provides three layers of protection:
 
 1. **Out-of-tree** — AI agents scanning the project directory never encounter the vault
-2. **Opaque UIDs** — symlink targets (e.g., `~/.ignk/vault/a1b2c3d4/.env`) don't reveal the project path or allow prediction of other projects' vault locations
+2. **Opaque UIDs** — symlink targets (e.g., `~/.ignlnk/vault/a1b2c3d4/.env`) don't reveal the project path or allow prediction of other projects' vault locations
 3. **No in-project vault references** — the project tree contains only `manifest.json` (file list + states) and placeholder files; the vault UID never appears in-project, so there's no breadcrumb for agents to follow
-4. **Relocation-friendly** — moving a project only requires updating `~/.ignk/index.json`, not restructuring the vault
+4. **Relocation-friendly** — moving a project only requires updating `~/.ignlnk/index.json`, not restructuring the vault
 
 ### Core Commands
 
 ```
-ignk init                    # Initialize .ignk/ in project root
-ignk lock <path>...          # Move file(s) to vault, replace with placeholder
-ignk unlock <actual-path>...        # Replace placeholder with symlink to vault copy
-ignk status                  # Show lock state of all managed files
-ignk list                    # List all managed files and their states
-ignk forget <path>...        # Unmanage file(s), restore original in place
-ignk lock-all                # Lock all managed files
-ignk unlock-all              # Unlock all managed files
+ignlnk init                    # Initialize .ignlnk/ in project root
+ignlnk lock <path>...          # Move file(s) to vault, replace with placeholder
+ignlnk unlock <actual-path>...        # Replace placeholder with symlink to vault copy
+ignlnk status                  # Show lock state of all managed files
+ignlnk list                    # List all managed files and their states
+ignlnk forget <path>...        # Unmanage file(s), restore original in place
+ignlnk lock-all                # Lock all managed files
+ignlnk unlock-all              # Unlock all managed files
 ```
 
 ### Recommended Approach
@@ -107,11 +107,11 @@ ignk unlock-all              # Unlock all managed files
 Only metadata lives inside the project — no secrets, no vault identifiers:
 
 ```
-.ignk/
+.ignlnk/
 └── manifest.json           # Tracks managed files and their states
 ```
 
-The vault UID is **never stored in-project**. `ignk` resolves the vault at runtime by looking up the current project root in the central `~/.ignk/index.json`. This ensures that nothing inside the project tree can lead an agent to the vault location.
+The vault UID is **never stored in-project**. `ignlnk` resolves the vault at runtime by looking up the current project root in the central `~/.ignlnk/index.json`. This ensures that nothing inside the project tree can lead an agent to the vault location.
 
 ### Manifest Schema
 
@@ -133,10 +133,10 @@ The manifest uses **project-relative paths** only. The vault location is compute
 ### Placeholder File Format
 
 ```
-[ignk:protected] This file is protected by ignk.
+[ignlnk:protected] This file is protected by ignlnk.
 To view its contents, ask the user to run:
 
-    ignk unlock config/secrets.yaml
+    ignlnk unlock config/secrets.yaml
 
 Do NOT attempt to modify or bypass this file.
 ```
@@ -155,14 +155,14 @@ The placeholder is deliberately plain text (not JSON/YAML/code) so any agent tha
 ### Integration Points
 
 - **`.gitignore`** — Placeholder files are committed; no vault content is in-tree to ignore
-- **`.ignk/manifest.json`** — Should be committed so team members know which files are managed
+- **`.ignlnk/manifest.json`** — Should be committed so team members know which files are managed
 - **Placeholder files** — Should be committed so cloned repos show the protection stubs
 
 ### Technology Choices (Decided)
 
 - **Language:** Go — single binary, fast, good cross-platform symlink support, simple distribution
 - **Distribution:** Compiled binaries via GitHub Releases (per-platform)
-- **File selection:** Explicit paths (`ignk lock .env`) + `.ignkfiles` declarative patterns (`.gitignore`-style)
+- **File selection:** Explicit paths (`ignlnk lock .env`) + `.ignlnkfiles` declarative patterns (`.gitignore`-style)
 - **Scope:** Files only (no directory locking)
 
 ---
@@ -174,7 +174,7 @@ The placeholder is deliberately plain text (not JSON/YAML/code) so any agent tha
 - **Project filesystem** — files are moved/replaced; build tools, editors, and agents see either placeholders or symlinks
 - **Git workflow** — placeholder files are committed; vault is external and never touched by git
 - **CI/CD** — locked files won't have real content; CI must either unlock or use its own secrets management
-- **Team workflow** — vault is per-machine; team members need ignk installed and must source secrets independently (correct behavior — secrets shouldn't travel via git)
+- **Team workflow** — vault is per-machine; team members need ignlnk installed and must source secrets independently (correct behavior — secrets shouldn't travel via git)
 
 ### Dependencies
 
@@ -187,7 +187,7 @@ The placeholder is deliberately plain text (not JSON/YAML/code) so any agent tha
 |------|------------|--------|------------|
 | AI agent follows/resolves symlinks when unlocked | Medium | Medium | By design — unlock grants access; lock when done |
 | AI agent overwrites placeholder with generated content | Medium | Medium | Placeholder integrity check on unlock; warn user |
-| User forgets to re-lock before committing | Medium | High | Pre-commit hook (`ignk check`) that warns if unlocked files are staged |
+| User forgets to re-lock before committing | Medium | High | Pre-commit hook (`ignlnk check`) that warns if unlocked files are staged |
 | Project directory is moved/renamed | Low | Low | Vault uses UIDs, not project paths; index auto-updates on next command |
 | Vault deletion | Low | Critical | Hash verification; clear error messages; vault is just files — normal backup practices apply |
 | Build tools break on placeholder files | Medium | Medium | Placeholder matches no valid syntax — build fails loud, not silent |
@@ -202,7 +202,7 @@ None — greenfield project.
 
 ### Project Relocation
 
-If the project directory moves, symlinks pointing to the vault still work (vault paths use UIDs, not project paths). However, the central `~/.ignk/index.json` mapping becomes stale. Running any `ignk` command from the new location auto-updates the index. Dangling symlinks in the project need re-creation — `ignk unlock --refresh` can handle this.
+If the project directory moves, symlinks pointing to the vault still work (vault paths use UIDs, not project paths). However, the central `~/.ignlnk/index.json` mapping becomes stale. Running any `ignlnk` command from the new location auto-updates the index. Dangling symlinks in the project need re-creation — `ignlnk unlock --refresh` can handle this.
 
 ### Protection is Locked-State Only
 
@@ -221,11 +221,11 @@ The vault doesn't travel with the project. New team members or fresh clones see 
 ## Open Questions (Resolved)
 
 - [x] What language/runtime? → **Go**, compiled binaries via GitHub Releases
-- [x] Glob patterns? → **Yes**, via `.ignkfiles` (`.gitignore`-style declarative file)
+- [x] Glob patterns? → **Yes**, via `.ignlnkfiles` (`.gitignore`-style declarative file)
 - [x] Git hooks? → **Deferred** (post-MVP)
 - [x] File extension? → **Preserve original extension** (placeholder replaces content, keeps the filename)
 - [x] Directories? → **Files only**
-- [x] Declarative file selection? → **Yes**, `.ignkfiles` in project root
+- [x] Declarative file selection? → **Yes**, `.ignlnkfiles` in project root
 
 ---
 
@@ -243,7 +243,7 @@ If accepted:
 
 ### Threat Model
 
-`ignk` protects against **opportunistic reads by AI agents**, not against determined adversaries. It is a *courtesy lock*, not a security boundary. Specifically:
+`ignlnk` protects against **opportunistic reads by AI agents**, not against determined adversaries. It is a *courtesy lock*, not a security boundary. Specifically:
 
 | Threat | Protected? | Notes |
 |--------|-----------|-------|
@@ -261,5 +261,5 @@ If accepted:
 3. **Environment variables only** — Good practice but not always feasible for complex configs, certificates, or proprietary code files
 4. **`.env` + `.gitignore`** — Only protects from git commits, not from local file reads by agents
 5. **File permissions (chmod)** — Agents typically run as the same user; no protection
-6. **In-project vault** (original design) — Vault inside project tree is discoverable by the same agents ignk aims to block; rejected in favor of centralized external vault
+6. **In-project vault** (original design) — Vault inside project tree is discoverable by the same agents ignlnk aims to block; rejected in favor of centralized external vault
 7. **Full-path vault mirroring** — Vault mirrors original absolute paths (Sandboxie-style); rejected because symlink targets expose project paths and make vault locations predictable across projects; replaced with UID-based vault isolation
