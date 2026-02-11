@@ -1,6 +1,8 @@
 # ignlnk MVP Implementation
 
-> **Status:** Draft (rev 3 — post red team pass 2)
+> **Status:** Complete
+> **Completed:** 2026-02-12
+> **Walkthrough:** `20260211-ignlnk-mvp-walkthrough.md`
 > **Created:** 2026-02-11
 > **Author:** Claude (agent) + user
 > **Source:** `20260211-ignlnk-cli-tool-proposal.md`
