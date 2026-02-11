@@ -12,7 +12,7 @@ Basically, ignlnk swap the files you lock with symlinks and replace the symlinks
 
 Functionality wise this is just an file content obfuscation tool, but this adapt to agents' natural language capability to ask for permission when they see the placeholder. 
 
-Just like [Projex](github.com/No3371/projex), this is for collaborative agentic development. If you like hands off vibe coding, it's much less meaningful.
+Just like [Projex](https://github.com/No3371/projex), this is for collaborative agentic development. If you like hands off vibe coding, it's much less meaningful.
 
 Note1: By the way, this is based on an assumption: the agents are not malicious. This only prevents less capable agents accidentally read, write or leak content of private files.
 
