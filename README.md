@@ -31,42 +31,6 @@ Note2: This is mostly generated after a lengthened planning. If you are interest
 
 -- The following is LLM generated --
 
-**Protect sensitive files from AI coding agents.**
-
-ignlnk is a CLI tool that shields files you don't want AI agents to read or modify — API keys, credentials, proprietary configs, personal notes — by replacing them with inert placeholder stubs and storing the originals in a secure vault outside your project tree.
-
-When *you* need the real files back, a single command restores access via symlinks. Lock before handing off to an agent; unlock when you're done.
-
-## The Problem
-
-AI coding agents (Copilot, Cursor, Goose, Aider, etc.) typically have read access to your entire project directory. There's no standard mechanism to tell them "don't look at this file." `.gitignore` only controls version control — agents ignore it. Sensitive files sitting in your working tree are fair game.
-
-ignlnk solves this by **physically removing** sensitive files from the project tree during agent sessions, replacing them with harmless placeholders that contain no real content.
-
-## How It Works
-
-Each managed file has two states:
-
-| State | In Project Tree | In Vault | Agent Sees |
-|---|---|---|---|
-| **Locked** | Placeholder stub | Original file | A text file prefixed with `[ignlnk:protected]` instructing agents to ask you to unlock |
-| **Unlocked** | Symlink → vault | Original file | Real content (via symlink) |
-
-```
-# Locked state (safe for agents)
-myproject/
-  .env              ← placeholder (inert text)
-  
-~/.ignlnk/vault/<uid>/
-  .env              ← real file (agent can't reach here)
-
-# Unlocked state (you're working)
-myproject/
-  .env              ← symlink → ~/.ignlnk/vault/<uid>/.env
-```
-
-The vault lives at `~/.ignlnk/vault/`, with each project isolated by a unique ID. A manifest (`.ignlnk/manifest.json`) tracks managed files and their states.
-
 ## Installation
 
 ### Using `go install` (Recommended)
@@ -120,6 +84,44 @@ Then lock/unlock everything at once:
 ignlnk lock-all          # Lock all files matching patterns
 ignlnk unlock-all        # Unlock all managed files
 ```
+
+## Introduction
+
+**Protect sensitive files from AI coding agents.**
+
+ignlnk is a CLI tool that shields files you don't want AI agents to read or modify — API keys, credentials, proprietary configs, personal notes — by replacing them with inert placeholder stubs and storing the originals in a secure vault outside your project tree.
+
+When *you* need the real files back, a single command restores access via symlinks. Lock before handing off to an agent; unlock when you're done.
+
+## The Problem
+
+AI coding agents (Copilot, Cursor, Goose, Aider, etc.) typically have read access to your entire project directory. There's no standard mechanism to tell them "don't look at this file." `.gitignore` only controls version control — agents ignore it. Sensitive files sitting in your working tree are fair game.
+
+ignlnk solves this by **physically removing** sensitive files from the project tree during agent sessions, replacing them with harmless placeholders that contain no real content.
+
+## How It Works
+
+Each managed file has two states:
+
+| State | In Project Tree | In Vault | Agent Sees |
+|---|---|---|---|
+| **Locked** | Placeholder stub | Original file | A text file prefixed with `[ignlnk:protected]` instructing agents to ask you to unlock |
+| **Unlocked** | Symlink → vault | Original file | Real content (via symlink) |
+
+```
+# Locked state (safe for agents)
+myproject/
+  .env              ← placeholder (inert text)
+  
+~/.ignlnk/vault/<uid>/
+  .env              ← real file (agent can't reach here)
+
+# Unlocked state (you're working)
+myproject/
+  .env              ← symlink → ~/.ignlnk/vault/<uid>/.env
+```
+
+The vault lives at `~/.ignlnk/vault/`, with each project isolated by a unique ID. A manifest (`.ignlnk/manifest.json`) tracks managed files and their states.
 
 ## Command Reference
 
