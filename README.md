@@ -1,5 +1,16 @@
 # ignlnk
 
+`ignlnk` is a cli tool to lock/unlock file **content** instead of hiding files, against AI agents.
+
+```
+[ignlnk:protected] This file is protected by ignlnk.
+To view its contents, ask the user to run:
+
+    ignlnk unlock .env
+
+Do NOT attempt to modify or bypass this file.
+```
+
 This is a different attempt to solve privacy issue with LLM agents.
 
 Currently agentics apps have no standard way to hide files from LLM agents, best scenario is .gitignore + platform-defined settings/ignorefile, some only use .gitignore, some only use settings. This is especially an issue when your "files not to commit" and "files not to be sent to LLM providers" overlaps.
